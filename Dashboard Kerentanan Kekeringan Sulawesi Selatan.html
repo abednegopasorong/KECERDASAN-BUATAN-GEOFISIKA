@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dashboard Kerentanan Kekeringan Sulawesi Selatan</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light;
+--bg:#f4f6f3;--card:#fff;--ink:#1c2a1f;--mute:#64736a;--line:#dde4dd;--accent:#1f7a4d;--sea:#e8eef2}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#111712;--card:#1a221c;--ink:#e6efe8;--mute:#93a398;--line:#2c382f;--accent:#4cc38a;--sea:#14202a}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#111712;--card:#1a221c;--ink:#e6efe8;--mute:#93a398;--line:#2c382f;--accent:#4cc38a;--sea:#14202a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{padding:18px 20px 6px}
+h1{margin:0;font-size:20px}header p{margin:2px 0 0;color:var(--mute);font-size:13px}
+.wrap{padding:12px 20px 28px;max-width:1280px;margin:auto}
+.filters{display:flex;flex-wrap:wrap;gap:10px;align-items:end;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:14px}
+.filters label{display:flex;flex-direction:column;font-size:11px;color:var(--mute);gap:3px;text-transform:uppercase;letter-spacing:.04em}
+select,button{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+button{cursor:pointer}button:hover{border-color:var(--accent)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.kpi small{color:var(--mute);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.kpi b{display:block;font-size:28px;line-height:1.2;margin-top:2px}
+.kpi span{font-size:12px;color:var(--mute)}
+.badge{display:inline-block;padding:2px 12px;border-radius:99px;color:#fff;font-size:22px;font-weight:700;margin-top:4px}
+.grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:14px;margin-bottom:14px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.maphead{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:space-between;margin-bottom:8px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;border-radius:0;background:transparent}.seg button.on{background:var(--accent);color:#fff}
+#mapbox{position:relative}
+#map{height:480px;border-radius:10px;background:var(--sea)}
+#info{position:absolute;left:10px;top:10px;z-index:1000;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:12px;max-width:210px;pointer-events:none}
+#zoom{position:absolute;right:10px;top:10px;z-index:1000;display:flex;flex-direction:column;gap:4px}
+#zoom button{width:30px;padding:4px 0}
+#legend{position:absolute;right:10px;bottom:10px;z-index:1000;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:11px;width:170px}
+#legend i{display:block;height:9px;border-radius:5px;margin:4px 0 2px}
+#legend div{display:flex;justify-content:space-between;color:var(--mute)}
+.chartbox{height:300px;position:relative}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;color:var(--mute);font-weight:500;font-size:11px;text-transform:uppercase;padding:4px 6px}
+td{padding:6px;border-top:1px solid var(--line)}
+tr.row{cursor:pointer}tr.row:hover{background:var(--bg)}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
+.rec li{margin:4px 0}.rec ul{padding-left:18px;margin:6px 0 0}
+.note{color:var(--mute);font-size:12px;margin-top:10px}
+h2{font-size:14px;margin:0 0 8px}
+/* Leaflet minimal CSS (inline) */
+.leaflet-pane,.leaflet-zoom-box,.leaflet-layer{position:absolute;left:0;top:0}
+.leaflet-container{overflow:hidden;position:relative;outline:0;-webkit-tap-highlight-color:transparent}
+.leaflet-pane>svg{position:absolute;left:0;top:0;max-width:none!important;max-height:none!important}
+.leaflet-tile-pane{z-index:200}.leaflet-overlay-pane{z-index:400}.leaflet-marker-pane{z-index:600}
+.leaflet-zoom-animated{transform-origin:0 0}
+.leaflet-pane>svg path{pointer-events:none}
+.leaflet-pane>svg path.leaflet-interactive{pointer-events:auto}
+.leaflet-interactive{cursor:pointer}.leaflet-grab{cursor:grab}.leaflet-dragging .leaflet-grab{cursor:grabbing}
+</style>
+</head>
+<body>
+<header>
+  <h1>Dashboard Kerentanan Kekeringan &amp; Mitigasi Spasial — Sulawesi Selatan</h1>
+  <p>Indikator iklim dan vegetasi (curah hujan, NDVI, NDWI) untuk memetakan wilayah rentan kekeringan. Data pada dashboard ini adalah data simulasi untuk demonstrasi.</p>
+</header>
+<div class="wrap">
+  <div class="filters">
+    <label>Provinsi<select id="fProv"><option>Sulawesi Selatan</option></select></label>
+    <label>Kabupaten/Kota<select id="fKab"></select></label>
+    <label>Tahun<select id="fYear"></select></label>
+    <label>Musim<select id="fSeason"><option value="all">Semua</option><option value="kemarau">Kemarau (Mei–Okt)</option><option value="hujan">Hujan (Nov–Apr)</option></select></label>
+    <label>Ambang terdampak (indeks ≥)<select id="fThr"><option>35</option><option selected>45</option><option>60</option></select></label>
+    <button id="btnCsv">Unduh CSV</button>
+    <button id="btnReset">Reset</button>
+  </div>
+
+  <div class="kpis">
+    <div class="card kpi"><small>Indeks Kekeringan Rata-rata</small><b id="kIdx">–</b><span id="kIdxS"></span></div>
+    <div class="card kpi"><small>Luas Area Terdampak</small><b id="kArea">–</b><span id="kAreaS"></span></div>
+    <div class="card kpi"><small>Status</small><span class="badge" id="kStat">–</span><br><span id="kStatS"></span></div>
+    <div class="card kpi"><small>Curah Hujan Rata-rata</small><b id="kRain">–</b><span id="kRainS"></span></div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="maphead"><h2 style="margin:0">Peta Tematik</h2>
+        <div class="seg" id="layerSeg"><button data-l="ki" class="on">Indeks Kekeringan</button><button data-l="ndvi">NDVI</button><button data-l="ndwi">NDWI</button></div>
+      </div>
+      <div id="mapbox"><div id="map"></div><div id="info">Arahkan kursor ke sel peta</div>
+        <div id="zoom"><button id="zi">+</button><button id="zo">−</button></div><div id="legend"></div></div>
+      <p class="note">Sel peta 0,1° (≈ 12.000 ha) hasil agregasi per kabupaten dengan variasi spasial. Klik sel atau lingkaran kabupaten untuk memilih wilayah.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="card"><h2>Peringkat Kerentanan Kabupaten/Kota</h2><div id="rank"></div></div>
+      <div class="card rec"><h2>Rekomendasi Mitigasi</h2><div id="rec"></div></div>
+    </div>
+  </div>
+
+  <div class="card"><h2>Tren Curah Hujan Bulanan vs Indeks Kekeringan (Jan 2022 – Okt 2026)</h2>
+    <div class="chartbox"><canvas id="chart"></canvas></div>
+    <p class="note">Batang terang = bulan yang termasuk periode filter terpilih. Indeks 0–100: makin tinggi makin kering (gabungan defisit hujan, NDVI rendah, dan NDWI rendah).</p></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+// ===== Data simulasi (ganti dengan data Sentinel/Landsat/CHIRPS hasil olahan Anda) =====
+const KAB=[ // nama, lat, lng, faktor basah, faktor vegetasi
+["Makassar",-5.14,119.41,1.0,.7],["Gowa",-5.3,119.75,1.0,1.0],["Takalar",-5.4,119.45,.72,.85],["Jeneponto",-5.65,119.75,.58,.8],
+["Bantaeng",-5.55,119.95,.8,.95],["Bulukumba",-5.4,120.2,.95,1.0],["Sinjai",-5.15,120.2,1.0,1.05],["Maros",-4.95,119.6,.95,.95],
+["Pangkep",-4.8,119.6,.88,.9],["Barru",-4.4,119.65,.85,.9],["Parepare",-4.0,119.63,.85,.8],["Soppeng",-4.35,119.9,.9,1.0],
+["Wajo",-4.0,120.0,.78,.9],["Bone",-4.7,120.25,.85,.95],["Sidrap",-3.9,119.9,.8,.9],["Pinrang",-3.7,119.65,.95,1.0],
+["Enrekang",-3.5,119.9,1.0,1.05],["Tana Toraja",-3.1,119.8,1.3,1.1],["Luwu",-3.3,120.3,1.2,1.1],["Palopo",-3.0,120.2,1.2,1.0],
+["Luwu Utara",-2.6,120.3,1.3,1.1],["Luwu Timur",-2.6,121.2,1.3,1.1]];
+const POLY=[[119.7,-2.9],[120.3,-2.6],[121,-2.5],[121.8,-2.6],[121.7,-3],[121.2,-3.3],[120.5,-3.1],[120.3,-3.4],[120.35,-4],[120.3,-4.7],[120.35,-5.2],[120.45,-5.6],[120.1,-5.7],[119.7,-5.7],[119.45,-5.4],[119.38,-5],[119.5,-4.5],[119.6,-4],[119.5,-3.6],[119.7,-3.2]];
+const Y0=2022,NM=58,ANOM={2022:1.2,2023:.65,2024:1,2025:1.05,2026:.85};
+const MON=["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+const isDry=m=>m>=4&&m<=9;
+function rng(s){return()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const R=rng(2026),cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+const D=KAB.map(k=>{let prev=null;return Array.from({length:NM},(_,t)=>{const y=Y0+Math.floor(t/12),m=t%12;
+  let rain=k[3]*(160+170*Math.cos(2*Math.PI*m/12))*ANOM[y]*(.8+.4*R());
+  if(y===2023&&m>=5&&m<=9)rain*=.5; rain=Math.max(12,rain);
+  const r=prev==null?rain:(rain+prev)/2;prev=rain;
+  const ndvi=cl(.18+.58*(1-Math.exp(-r/150))*k[4],.1,.85),ndwi=cl(-.4+.62*(1-Math.exp(-r/200))*Math.min(1.1,k[3]),-.45,.3);
+  const ki=cl(100*(.45*(1-(ndvi-.15)/.65)+.25*(1-(ndwi+.4)/.7)+.3*(1-Math.min(r/200,1))),0,100);
+  return{y,m,rain,ndvi,ndwi,ki}})});
+const inPoly=(x,y)=>{let c=false;for(let i=0,j=POLY.length-1;i<POLY.length;j=i++){const[a,b]=POLY[i],[p,q]=POLY[j];if((b>y)!==(q>y)&&x<(p-a)*(y-b)/(q-b)+a)c=!c}return c};
+const CELLS=[];for(let la=-5.7;la<-2.5;la+=.1)for(let lo=119.4;lo<121.8;lo+=.1){const cy=la+.05,cx=lo+.05;if(!inPoly(cx,cy))continue;
+  let bi=0,bd=1e9;KAB.forEach((k,i)=>{const d=(k[1]-cy)**2+(k[2]-cx)**2;if(d<bd){bd=d;bi=i}});CELLS.push({la,lo,k:bi,n:R()*2-1})}
+const HA=1.2e4;
+
+// ===== Warna =====
+const RAMP={ki:[[0,"#2e8b57"],[.35,"#d9d95a"],[.6,"#f0a030"],[1,"#c0392b"]],ndvi:[[0,"#a0703c"],[.4,"#d8c97a"],[.7,"#6bb04a"],[1,"#145a32"]],ndwi:[[0,"#c9a46a"],[.45,"#e6e2c8"],[.75,"#6fb1d6"],[1,"#12508a"]]};
+const RANGE={ki:[0,100,"Indeks (0–100)"],ndvi:[.1,.8,"NDVI"],ndwi:[-.4,.3,"NDWI"]};
+const hex=h=>[1,3,5].map(i=>parseInt(h.substr(i,2),16));
+function color(l,v){const[a,b]=RANGE[l],t=cl((v-a)/(b-a),0,1),s=RAMP[l];for(let i=1;i<s.length;i++)if(t<=s[i][0]){const u=(t-s[i-1][0])/(s[i][0]-s[i-1][0]),c1=hex(s[i-1][1]),c2=hex(s[i][1]);return"rgb("+c1.map((c,j)=>Math.round(c+(c2[j]-c)*u)).join(",")+")"}return s[s.length-1][1]}
+const STAT=v=>v<30?["Normal","#2e8b57"]:v<45?["Waspada","#d4a017"]:v<60?["Siaga","#e07b1a"]:["Awas","#c0392b"];
+const SPREAD={ki:7,ndvi:.045,ndwi:.03};
+
+// ===== State & agregasi =====
+const S={kab:-1,year:0,season:"all",thr:45,layer:"ki"};
+const sel=document.getElementById.bind(document);
+sel("fKab").innerHTML='<option value="-1">Seluruh Sulawesi Selatan</option>'+KAB.map((k,i)=>`<option value="${i}">${k[0]}</option>`).join("");
+sel("fYear").innerHTML='<option value="0">2022–2026 (semua)</option>'+[2026,2025,2024,2023,2022].map(y=>`<option>${y}</option>`).join("");
+const tIn=t=>{const d=D[0][t];return(S.year===0||d.y===S.year)&&(S.season==="all"||(S.season==="kemarau")===isDry(d.m))};
+function aggK(i){const ts=[...Array(NM).keys()].filter(tIn);const o={ki:0,ndvi:0,ndwi:0,rain:0};ts.forEach(t=>{for(const f in o)o[f]+=D[i][t][f]});for(const f in o)o[f]/=Math.max(1,ts.length);o.n=ts.length;return o}
+let AG=[];
+const cellVal=(c,l)=>AG[c.k][l]+c.n*SPREAD[l];
+function summary(){const cs=CELLS.filter(c=>S.kab<0||c.k===S.kab);let ki=0,rain=0,aff=0;cs.forEach(c=>{const v=cellVal(c,"ki");ki+=v;rain+=AG[c.k].rain;if(v>=S.thr)aff++});
+  return{ki:ki/cs.length,rain:rain/cs.length,area:aff*HA,total:cs.length*HA,n:cs.length}}
+
+// ===== Peta =====
+const map=L.map("map",{zoomControl:false,attributionControl:false,zoomSnap:.25,minZoom:7,maxZoom:11});
+map.fitBounds([[-5.8,119.3],[-2.4,121.9]]);
+sel("zi").onclick=()=>map.zoomIn();sel("zo").onclick=()=>map.zoomOut();
+const rects=CELLS.map(c=>{const r=L.rectangle([[c.la,c.lo],[c.la+.1,c.lo+.1]],{weight:0,fillOpacity:.85}).addTo(map);
+  r.on("mouseover",()=>{const l=S.layer,v=cellVal(c,l);sel("info").innerHTML=`<b>${KAB[c.k][0]}</b><br>${RANGE[l][2]}: ${l==="ki"?v.toFixed(1):v.toFixed(2)}<br>Status: ${STAT(cellVal(c,"ki"))[0]}`});
+  r.on("click",()=>{sel("fKab").value=c.k;S.kab=c.k;update()});return r});
+const marks=KAB.map((k,i)=>{const m=L.circleMarker([k[1],k[2]],{radius:5,weight:2,color:"#fff",fillOpacity:1}).addTo(map);
+  m.on("mouseover",()=>sel("info").innerHTML=`<b>${k[0]}</b><br>Indeks: ${AG[i].ki.toFixed(1)}<br>${STAT(AG[i].ki)[0]}`);
+  m.on("click",()=>{sel("fKab").value=i;S.kab=i;update()});return m});
+
+function drawMap(){const l=S.layer;rects.forEach((r,j)=>{const c=CELLS[j],on=S.kab<0||c.k===S.kab;r.setStyle({fillColor:color(l,cellVal(c,l)),fillOpacity:on?.88:.12})});
+  marks.forEach((m,i)=>m.setStyle({fillColor:STAT(AG[i].ki)[1],color:i===S.kab?"#000":"#fff",radius:i===S.kab?8:5}));
+  const[a,b,t]=RANGE[l],g=RAMP[l].map(s=>s[1]+" "+Math.round(s[0]*100)+"%").join(",");
+  sel("legend").innerHTML=`<b>${t}</b><i style="background:linear-gradient(90deg,${g})"></i><div><span>${a}</span><span>${b}</span></div>`}
+
+// ===== Grafik =====
+const lbl=[...Array(NM).keys()].map(t=>MON[t%12]+" "+String(Y0+Math.floor(t/12)).slice(2));
+const ch=new Chart(sel("chart"),{data:{labels:lbl,datasets:[
+  {type:"bar",label:"Curah hujan (mm/bulan)",data:[],backgroundColor:[],yAxisID:"y",order:2},
+  {type:"line",label:"Indeks kekeringan",data:[],borderColor:"#c0392b",backgroundColor:"#c0392b",tension:.3,pointRadius:2,yAxisID:"y1",order:1}]},
+  options:{responsive:true,maintainAspectRatio:false,interaction:{mode:"index",intersect:false},
+  scales:{x:{ticks:{maxTicksLimit:12,maxRotation:0},grid:{display:false}},y:{title:{display:true,text:"mm/bulan"},beginAtZero:true},y1:{position:"right",min:0,max:100,title:{display:true,text:"Indeks"},grid:{drawOnChartArea:false}}},
+  plugins:{legend:{position:"bottom"}}}});
+function drawChart(){const ids=S.kab<0?KAB.map((_,i)=>i):[S.kab];
+  const avg=f=>[...Array(NM).keys()].map(t=>ids.reduce((s,i)=>s+D[i][t][f],0)/ids.length);
+  ch.data.datasets[0].data=avg("rain");ch.data.datasets[0].backgroundColor=[...Array(NM).keys()].map(t=>tIn(t)?"rgba(70,140,200,.85)":"rgba(70,140,200,.25)");
+  ch.data.datasets[1].data=avg("ki");ch.update()}
+
+// ===== Panel =====
+const REC={Normal:["Pertahankan pemantauan rutin NDVI/NDWI setiap 10 harian.","Jaga tutupan vegetasi dan fungsi embung, waduk, serta saluran irigasi.","Perbarui peta rawan sebagai baseline musim kemarau berikutnya."],
+Waspada:["Percepat pemantauan menjadi mingguan dan siapkan peringatan dini ke petani.","Atur jadwal tanam dan pola giliran air irigasi.","Dorong varietas toleran kering dan mulai penampungan air (embung, sumur resapan)."],
+Siaga:["Aktifkan posko siaga kekeringan dan petakan desa prioritas.","Distribusikan air bersih dan pompa; prioritaskan lahan pangan.","Lakukan hujan buatan atau pengelolaan reservoir bila memenuhi kriteria teknis, serta bantuan benih tahan kering."],
+Awas:["Tetapkan status tanggap darurat dan koordinasi BPBD, Dinas PU, serta Dinas Pertanian.","Suplai air bersih dan logistik pangan untuk desa terdampak berat.","Siapkan asuransi usaha tani, pergeseran komoditas, dan pengendalian karhutla pada lahan kering."]};
+function panel(){const s=summary(),st=STAT(s.ki),pk=S.year?S.year:"2022–2026",ms={all:"sepanjang tahun",kemarau:"musim kemarau",hujan:"musim hujan"}[S.season];
+  sel("kIdx").textContent=s.ki.toFixed(1);sel("kIdxS").textContent=(S.kab<0?"Sulawesi Selatan":KAB[S.kab][0])+" · "+pk+" · "+ms;
+  sel("kArea").textContent=Math.round(s.area).toLocaleString("id-ID")+" Ha";sel("kAreaS").textContent=(s.area/s.total*100).toFixed(1)+"% dari wilayah (indeks ≥ "+S.thr+")";
+  const b=sel("kStat");b.textContent=st[0];b.style.background=st[1];sel("kStatS").textContent="Normal < 30 · Waspada < 45 · Siaga < 60 · Awas ≥ 60";
+  sel("kRain").textContent=Math.round(s.rain)+" mm/bln";sel("kRainS").textContent="Rata-rata periode terpilih";
+  sel("rec").innerHTML="<b>Status "+st[0]+"</b><ul>"+REC[st[0]].map(x=>"<li>"+x+"</li>").join("")+"</ul>";
+  const rk=KAB.map((k,i)=>({i,n:k[0],...AG[i]})).sort((a,b)=>b.ki-a.ki).slice(0,8);
+  sel("rank").innerHTML="<table><tr><th>Wilayah</th><th>Indeks</th><th>NDVI</th><th>Status</th></tr>"+rk.map(r=>{const t=STAT(r.ki);return`<tr class="row" data-i="${r.i}"><td>${r.n}</td><td>${r.ki.toFixed(1)}</td><td>${r.ndvi.toFixed(2)}</td><td><span class="dot" style="background:${t[1]}"></span>${t[0]}</td></tr>`}).join("")+"</table>";
+  document.querySelectorAll("tr.row").forEach(tr=>tr.onclick=()=>{S.kab=+tr.dataset.i;sel("fKab").value=S.kab;update()})}
+
+function update(){AG=KAB.map((_,i)=>aggK(i));drawMap();drawChart();panel()}
+sel("fKab").onchange=e=>{S.kab=+e.target.value;update()};
+sel("fYear").onchange=e=>{S.year=+e.target.value;update()};
+sel("fSeason").onchange=e=>{S.season=e.target.value;update()};
+sel("fThr").onchange=e=>{S.thr=+e.target.value;update()};
+document.querySelectorAll("#layerSeg button").forEach(b=>b.onclick=()=>{document.querySelectorAll("#layerSeg button").forEach(x=>x.classList.remove("on"));b.classList.add("on");S.layer=b.dataset.l;drawMap()});
+sel("btnReset").onclick=()=>{S.kab=-1;S.year=0;S.season="all";S.thr=45;sel("fKab").value=-1;sel("fYear").value=0;sel("fSeason").value="all";sel("fThr").value=45;map.fitBounds([[-5.8,119.3],[-2.4,121.9]]);update()};
+sel("btnCsv").onclick=()=>{const rows=["kabupaten,indeks_kekeringan,ndvi,ndwi,hujan_mm_bln,status"].concat(KAB.map((k,i)=>[k[0],AG[i].ki.toFixed(1),AG[i].ndvi.toFixed(3),AG[i].ndwi.toFixed(3),AG[i].rain.toFixed(0),STAT(AG[i].ki)[0]].join(",")));
+  const a=document.createElement("a");a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(rows.join("\n"));a.download="kekeringan_sulsel.csv";a.click()};
+update();
+</script>
+</body>
+</html>
